@@ -1,3 +1,4 @@
+import { createOpenAIClient, diagnostic } from './openai.mjs';
 import http from 'node:http';
 import { timingSafeEqual } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
@@ -9,14 +10,12 @@ export function configFromEnv(env=process.env){
  const origins=(env.ALLOWED_ORIGINS||'http://127.0.0.1:8000').split(',').map(s=>s.trim());
  for(const origin of origins){const u=new URL(origin);if(u.origin!==origin||(!['http://127.0.0.1:8000','http://localhost:8000'].includes(origin)&&u.protocol!=='https:'))throw Error('ALLOWED_ORIGINS må inneholde eksakte HTTPS-origins, uten sti.');}
  const limit=Number(env.MAX_REQUESTS_PER_DAY||30);if(!Number.isInteger(limit)||limit<1||limit>10000)throw Error('Ugyldig dagsgrense.');
- return {token,origins,apiKey:env.OPENAI_API_KEY,model:env.OPENAI_MODEL||'gpt-4.1-mini',dailyLimit:limit};
+ const model=(env.OPENAI_MODEL||'gpt-4.1-mini').trim();
+ if(!/^[a-zA-Z0-9][a-zA-Z0-9._:/-]{0,99}$/.test(model)||model.startsWith('sk-'))throw Error('OPENAI_MODEL må være en modell-ID, for eksempel gpt-4.1-mini.');
+ return {token,origins,apiKey:env.OPENAI_API_KEY,model,dailyLimit:limit};
 }
-export function createStudyServer(config,{callOpenAI}={}){
- const provider=callOpenAI|| (async body=>{
- const response=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${config.apiKey}`,'Content-Type':'application/json'},body:JSON.stringify({...body,model:config.model}),signal:AbortSignal.timeout(30000)});
- if(!response.ok){await response.body?.cancel();throw Error('Provider request failed');}
- return response.json();
- });
+export function createStudyServer(config,{callOpenAI,logFailure=entry=>console.error(JSON.stringify(entry))}={}){
+ const provider=callOpenAI||createOpenAIClient(config);
  let count=0,day='',busy=false;const attempts=new Map();
  const server=http.createServer(async(req,res)=>{
  res.setHeader('Content-Security-Policy',"default-src 'none'; frame-ancestors 'none'");res.setHeader('Referrer-Policy','no-referrer');
@@ -50,7 +49,7 @@ export function createStudyServer(config,{callOpenAI}={}){
  if(busy)return send(429,{error:'Assistenten jobber allerede. Prøv igjen snart.'});
  busy=true;count++;
  try {const result=await runAssistant({message,history,data,callOpenAI:provider});send(200,result);}
- catch {send(502,{error:'AI-tjenesten svarte ikke som forventet. Prøv igjen senere. Ingen studiedata er endret.'});}
+ catch(error) {logFailure(diagnostic(error));send(502,{error:'AI-tjenesten svarte ikke som forventet. Prøv igjen senere. Ingen studiedata er endret.'});}
  finally {busy=false;}
  }catch(e){if(!res.headersSent)send(e instanceof InputError||e instanceof SyntaxError?400:500,{error:e instanceof InputError?e.message:'Forespørselen kunne ikke behandles.'});}
  });
