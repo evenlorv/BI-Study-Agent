@@ -1,0 +1,29 @@
+# Preparation only. Applying this Blueprint in Render creates/deploys a service.
+# Secrets are supplied only inside Render, never committed here.
+services:
+  - type: web
+    name: bi-study-agent-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: feature/ai-study-agent
+    numInstances: 1
+    buildCommand: node --version
+    startCommand: node backend/server.mjs
+    healthCheckPath: /health
+    autoDeployTrigger: "off"
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: HOST
+        value: "0.0.0.0"
+      - key: ALLOWED_ORIGINS
+        value: https://evenlorv.github.io
+      - key: OPENAI_MODEL
+        value: gpt-4.1-mini
+      - key: MAX_REQUESTS_PER_DAY
+        value: "30"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: STUDY_ACCESS_TOKEN
+        generateValue: true
