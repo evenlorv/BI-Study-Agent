@@ -76,14 +76,14 @@ Denne delen gjelder lokal utvikling eller interne tester i skyen. Localhost i Co
    python3 -m http.server 8000 --bind 127.0.0.1
    ```
 
-6. Bruk `ALLOWED_ORIGINS=http://127.0.0.1:8000`. Åpne frontend på denne adressen. I AI-panelets tilkobling oppgir du `http://127.0.0.1:8787` og ditt private tilgangstoken. Trykk **Koble til**. Den første meldingen bekrefter om autentiseringen fungerer.
+6. Bruk `ALLOWED_ORIGINS=http://127.0.0.1:8000`. Åpne frontend på denne adressen. I AI-panelets tilkobling oppgir du `http://127.0.0.1:8787` og ditt private tilgangstoken. Trykk **Koble til**. Knappen tester health og autentisering uten studiedata eller OpenAI-kall. Den første chatmeldingen tester OpenAI.
 7. Be om en dagsplan, se forhåndsvisningen og godkjenn. Kontroller at en plan først blir synlig som godkjent etter ditt klikk. Avvis et nytt forslag og kontroller at data ikke endres.
 
 Endringer i miljøvariabler krever omstart av backend. Ikke bruk et offentlig tunnelverktøy eller deploy nøkler for å gjøre denne utviklingstesten offentlig.
 
-## Anbefalt hostingoppsett – ikke opprettet eller deployet
+## Hostingoppsett og nåværende tilkobling
 
-Arkitekturen er nå godkjent av brukeren. Følg [GO-LIVE.md](GO-LIVE.md) for den konkrete, oppdaterte Blueprint-flyten fra `feature/ai-study-agent`, privat nøkkelinnlegging og prisanslag. `render.yaml` er klargjort; opprettelse/deploy er fortsatt ikke utført. Den generelle oppsummeringen nedenfor er et alternativ for manuelt opprettet Web Service.
+Arkitekturen er nå godkjent av brukeren. Følg [GO-LIVE.md](GO-LIVE.md) for den konkrete, oppdaterte Blueprint-flyten fra `feature/ai-study-agent`, privat nøkkelinnlegging og prisanslag. Eieren har nå publisert backend på `https://bi-study-agent-api.onrender.com` og bekreftet health. Se [CONNECT-RENDER.md](CONNECT-RENDER.md) for tilkobling; frontend er ikke merget/deployet. Den generelle oppsummeringen nedenfor er et alternativ for manuelt opprettet Web Service.
 
 Bruk GitHub Pages til frontend og én separat **Node.js Web Service på Render** til backend. Ingen database trengs i v1. Render kan medføre kostnader og API-bruk hos OpenAI koster penger; ingen tjenester er opprettet som del av implementasjonen.
 
@@ -97,7 +97,7 @@ Etter at du har godkjent oppsettet, kan følgende gjøres:
 6. Åpne GitHub Pages-siden, oppgi backendens HTTPS-adresse og privat tilgangstoken i panelet. Ingen frontend-fil trenger å inneholde token eller API-nøkkel.
 7. Test at en melding uten token gir HTTP 401, og at en godkjent melding gir svar og bare forslag. Bekreft at avvisning og lagring fungerer på den faktiske HTTPS-adressen før vanlig bruk.
 
-Backend trenger utgående HTTPS til `api.openai.com`. I et nettverksbegrenset miljø må dette tillates. De virkelige DNS-, TLS- og plattforminnstillingene kan først verifiseres etter godkjent oppsett. Ingen driftsadresse finnes ennå.
+Backend trenger utgående HTTPS til `api.openai.com`. I et nettverksbegrenset miljø må dette tillates. De virkelige DNS-, TLS- og plattforminnstillingene kan først verifiseres etter godkjent oppsett. Driftsadressen er `https://bi-study-agent-api.onrender.com`. Direkte kontroll herfra blir blokkert av nettverkets egressproxy, så løpende CORS- og OpenAI-verifisering må gjøres i brukerens nettleser.
 
 ## Tester og verifiseringsstatus
 

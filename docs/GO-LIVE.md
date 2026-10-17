@@ -2,6 +2,8 @@
 
 Arkitekturen er godkjent: GitHub Pages + én Render-backend + OpenAI API. Denne veiledningen beskriver handlinger du kan utføre senere. AI-oppgraderingen ligger på `feature/ai-study-agent`; den er ikke merget til `main`. Ingen tjenester er deployet eller opprettet av Codex. Å bruke Render sin opprettelses-/Apply-knapp starter faktisk opprettelse og deploy; `autoDeployTrigger: "off"` hindrer senere automatisk utrulling, ikke den første.
 
+Backend er nå satt opp av eieren. For daglig tilkobling og tokenplassering, følg [CONNECT-RENDER.md](CONNECT-RENDER.md). Trinnene for nyopprettelse nedenfor er beholdt som referanse.
+
 ## Før du begynner
 
 - Ta en sikkerhetskopi med knappen i den eksisterende appen. Oppgraderingen beholder localStorage-nøkkelen og overskriver ikke eksisterende data ved oppstart.
@@ -63,7 +65,7 @@ Appens Node.js-server tilbyr kun API-ruter, ikke statisk filserver. `/health` er
 1. Åpne Render-adressen med `/health` til slutt i nettleseren. Du skal få `{"status":"ok"}`. Det viser at serveren kjører, men tester ikke OpenAI-kontoen. Ved gratisplan: vent på eventuell oppvåkning først.
 2. Når du er klar for frontendpublisering, merge den gjennomgåtte pull requesten til `main` på GitHub. GitHub Pages oppdateres da gjennom det eksisterende Pages-oppsettet. Ikke slett `feature/ai-study-agent` så lenge Render følger den branchen. Vi kan senere endre Render til `main` med en bevisst oppdatering av konfigurasjonen.
 3. Vent til Pages-utrullingen er ferdig og åpne den eksisterende Pages-adressen: `https://evenlorv.github.io/BI-Study-Agent/`. Gå til **AI-assistent → Tilkobling til privat backend**.
-4. Legg inn backendens HTTPS-adresse uten sti, og ditt **STUDY_ACCESS_TOKEN**. Trykk **Koble til**. Feltet er ikke for OpenAI-nøkkelen. Appen bekrefter ekte tilgang først når du sender en melding.
+4. Legg inn backendens HTTPS-adresse uten sti, og ditt **STUDY_ACCESS_TOKEN**. Trykk **Koble til**. Feltet er ikke for OpenAI-nøkkelen. Knappen kontrollerer health og autentisering uten studiedata eller OpenAI-kall. Første chatmelding tester OpenAI.
 5. Velg en dato med ledig studietid, og skriv «Lag en dagsplan for valgt dato». Kontroller at du får forslag og at ingenting lagres ennå.
 6. Trykk **Avvis forslagene** og kontroller at planen er uendret. Send på nytt, trykk **Godkjenn og lagre forslagene**, og kontroller at dagsplanen vises. Last siden på nytt og bekreft at planen er beholdt.
 7. Prøv et feil tilgangstoken: du skal få avslag. Koble deretter til med korrekt token igjen. Gå til OpenAI **Usage** og kontroller faktisk bruk/kostnad fra testen.

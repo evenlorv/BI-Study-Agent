@@ -78,13 +78,13 @@ Testen bruker en separat nettleserprofil og berører ikke dine egne nettleserdat
 
 ## AI-assistent: oppsett og test
 
-For klargjøring og manuelle steg til drift: [nybegynnerveiledning med kostnadsanslag](docs/GO-LIVE.md). Se også [sikkerhetsgjennomgangen](docs/SECURITY-REVIEW.md). `render.yaml` forbereder én gratis backend uten automatiske deploys og uten hemmelige verdier. Ingen tjeneste er opprettet.
+For klargjøring og manuelle steg til drift: [nybegynnerveiledning med kostnadsanslag](docs/GO-LIVE.md). Se også [sikkerhetsgjennomgangen](docs/SECURITY-REVIEW.md). `render.yaml` forbereder én gratis backend uten automatiske deploys og uten hemmelige verdier. Backend er nå opprettet av eieren på Render; se [tilkoblingsveiledningen](docs/CONNECT-RENDER.md).
 
 Se [den trinnvise AI-veiledningen](docs/AI-SETUP.md) for arkitektur, sikkerhet, miljøvariabler, lokal oppstart, hostingforslag og tester. AI-backend bruker Node.js 24 og OpenAI Responses API direkte, uten ekstra pakker. Ingen API-nøkler skal legges i nettleseren eller repositoryet.
 
-**Denne oppgraderingen er bare implementert og testet i skymiljøet. Backend er ikke deployet, ingen betalte tjenester er opprettet, og endringene er ikke pushet til `main`.** Testene bruker en simulert OpenAI-tjeneste; et ekte API-kall krever en privat servernøkkel.
+**Backend er publisert av eieren på `https://bi-study-agent-api.onrender.com`, og eieren har bekreftet health-svar. Frontend-oppgraderingen ligger fortsatt på `feature/ai-study-agent`, uten merge eller deploy til GitHub Pages.** Automatiske tester her bruker en simulert OpenAI-tjeneste. Skymiljøets nettverk blokkerer direkte testing av den publiserte backend-adressen.
 
-Uten backend fortsetter GitHub Pages å fungere som før. For å bruke AI trenger du senere en separat HTTPS-backend og et privat tilgangstoken. Chatpanelet forklarer hvilke data du deler, og lagrer verken token eller samtalehistorikk i localStorage.
+Uten backend fortsetter GitHub Pages å fungere som før. For å bruke AI kobler du til den separate HTTPS-backenden med ditt private tilgangstoken. Chatpanelet forklarer hvilke data du deler, og lagrer verken token eller samtalehistorikk i localStorage.
 
 ## Videre utvikling
 
