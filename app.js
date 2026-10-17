@@ -16,6 +16,8 @@ for(const select of document.querySelectorAll('.subject-select')) select.innerHT
 function render(){
  const day=$('#day').value||today();const goal=state.availability[day]??4;const minutes=state.sessions.filter(s=>s.date===day).reduce((sum,s)=>sum+s.minutes,0);const remaining=Math.max(0,Math.round(goal*60-minutes));
  $('#availability').value=goal;
+ const plan=state.plans?.[day];
+ $('#plan-content').innerHTML=plan ? `<p class="muted">${escape(plan.reason)} Planen er et lagret forslag; be om en ny plan hvis tilgjengelighet eller økter endres.</p>${plan.blocks.map(b=>`<div class="row"><div><strong>${escape(subjectName(b.subject))} · ${b.minutes} min</strong><small>${escape(b.title)}</small></div></div>`).join('')||'<p>Ingen ledig studietid eller aktuelle fag.</p>'}` : '<p class="muted">Ingen godkjent plan for valgt dato. Be assistenten om et forslag.</p>';
  $('#stats').innerHTML=`<div class="stat"><span>Planlagt selvstudietid</span><strong>${goal} t</strong></div><div class="stat"><span>Registrert denne dagen</span><strong>${minutes} min</strong></div><div class="stat"><span>Gjenstår av dagsmålet</span><strong>${remaining} min</strong></div>`;
  $('#subject-list').innerHTML=state.subjects.map(s=>`<article class="subject"><h3>${escape(s.name)}</h3><span class="target">Karaktermål: ${escape(s.target)}</span><progress value="${s.progress}" max="100" aria-label="Progresjon i ${escape(s.name)}"></progress><label>Progresjon (%)<input type="number" min="0" max="100" step="1" value="${s.progress}" data-progress="${escape(s.id)}" aria-label="Progresjon i ${escape(s.name)} i prosent"></label></article>`).join('');
  $('#exam-list').innerHTML=[...state.subjects].sort((a,b)=>a.exam.localeCompare(b.exam)).map(s=>`<div class="row"><div><strong>${escape(s.name)}</strong><small>Eksempeldato · mål ${escape(s.target)}</small></div><label><span class="muted">Eksamensdato</span><input type="date" value="${escape(s.exam)}" data-exam="${escape(s.id)}" aria-label="Eksamensdato for ${escape(s.name)}" required></label></div>`).join('');
@@ -31,3 +33,14 @@ $('#session-form').addEventListener('submit',e=>{e.preventDefault();const f=new 
 $('#export').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=`bi-study-agent-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
 $('#reset').addEventListener('click',()=>{if(confirm('Slette dine registrerte data og gjenopprette eksempeldata? Last gjerne ned en sikkerhetskopi først.')){state=seed();save();}});
 render();
+
+// Explicit bridge: the backend cannot read localStorage. Only this UI can commit approvals.
+window.studyAgent = Object.freeze({
+ snapshot() { return {state:structuredClone(state),day:$('#day').value||today(),stored:localStorage.getItem(KEY)}; },
+ commit(snapshot,next) {
+ if(JSON.stringify(state)!==JSON.stringify(snapshot.state)||($('#day').value||today())!==snapshot.day||localStorage.getItem(KEY)!==snapshot.stored) throw Error('Studiedata eller valgt dato er endret. Send en ny melding for et oppdatert forslag.');
+ // Persist first so a failed write never changes the active in-memory data.
+ localStorage.setItem(KEY,JSON.stringify(next));state=next;render();
+ $('#status').textContent='Godkjente AI-forslag er lagret i denne nettleseren.';
+ }
+});

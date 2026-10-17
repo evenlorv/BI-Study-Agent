@@ -1,6 +1,6 @@
 # BI Study Agent
 
-En enkel statisk studieplanlegger for en økonomistudent ved BI. Førsteversjonen bruker tydelig merkede eksempeldata og har ingen AI, filopplasting eller eksterne integrasjoner.
+En enkel statisk studieplanlegger for en økonomistudent ved BI. Appen bruker tydelig merkede eksempeldata. Dashboard, fag, eksamensplan, oppgaver og økter fungerer uten backend. Et valgfritt AI-panel kan kobles til en separat, privat backend. Filopplasting er ikke aktivert.
 
 ## Publiser med GitHub Pages (når du er klar)
 
@@ -20,7 +20,7 @@ Appen bruker relative filreferanser, slik at CSS og JavaScript lastes under `/BI
 
 GitHub Pages-versjonen lagrer fortsatt registreringene bare i nettleseren. Data fra en tidligere lokal adresse flyttes ikke automatisk over. `localStorage` er knyttet til nettstedets origin (protokoll og vertsnavn), ikke repositorymappen. Andre sider på samme `evenlorv.github.io`-origin deler derfor lagringsområde; denne appen bruker nøkkelen `bi-study-agent-v1`. Sletting av nettleserdata eller bytte av nettleser fjerner/endres tilgangen til lagrede registreringer. Ta sikkerhetskopier.
 
-GitHub Pages serverer den statiske appen; registreringene dine sendes ikke til GitHub av appen. Nettsiden er normalt offentlig tilgjengelig, og filer som pushes til repositoryet er ikke privat brukerlagring. Ikke legg personlige pensumfiler, sikkerhetskopier eller API-nøkler i publiseringsmappen. En fremtidig OpenAI Agents SDK-backend kan ikke kjøres på GitHub Pages og må få en separat serverløsning.
+GitHub Pages serverer den statiske appen; registreringene dine sendes ikke til GitHub av appen. Nettsiden er normalt offentlig tilgjengelig, og filer som pushes til repositoryet er ikke privat brukerlagring. Ikke legg personlige pensumfiler, sikkerhetskopier eller API-nøkler i publiseringsmappen. AI-backend kan ikke kjøres på GitHub Pages og må driftes separat, se [AI-oppsett](docs/AI-SETUP.md).
 
 ## Start på din egen datamaskin
 
@@ -52,9 +52,9 @@ Progresjon i fag endres manuelt, fordi antall studieminutter alene ikke viser hv
 
 ## Lagring og begrensninger
 
-Oppgaver, økter, eksamensdatoer, dagsmål og progresjon lagres i nettleserens `localStorage`. Ingen data sendes til en ekstern tjeneste. Data synkroniseres ikke mellom nettlesere eller maskiner, og sletting av nettleserdata fjerner dem. Privat modus kan slette data ved lukking. Sikkerhetskopier bør oppbevares trygt. «Tilbakestill» sletter registreringene etter bekreftelse.
+Oppgaver, økter, eksamensdatoer, dagsmål og progresjon lagres i nettleserens `localStorage`. Den vanlige studieplanleggeren sender ikke data til en ekstern tjeneste. Når du bruker AI-panelet, sendes et begrenset studiedatasett og chatten via din backend til OpenAI, som beskrevet i panelet og i AI-veiledningen. Data synkroniseres ikke mellom nettlesere eller maskiner, og sletting av nettleserdata fjerner dem. Privat modus kan slette data ved lukking. Sikkerhetskopier bør oppbevares trygt. «Tilbakestill» sletter registreringene etter bekreftelse.
 
-Ingen automatisk prioritering, planjustering, faglig AI-hjelp eller kalenderintegrasjon finnes i denne versjonen. Appen er ikke en offisiell BI-tjeneste.
+Når AI-backend er konfigurert, kan assistenten foreslå prioriterte dagsplaner, oppgaver og egenvurdert progresjon. Du må godkjenne forslagene før de lagres. Ingen kalenderintegrasjon eller pensumsøk finnes ennå. Appen er ikke en offisiell BI-tjeneste.
 
 ## Test selv
 
@@ -76,6 +76,16 @@ For å kontrollere prosjektstien som brukes av GitHub Pages, start i stedet serv
 
 Testen bruker en separat nettleserprofil og berører ikke dine egne nettleserdata. Sett `CHROMIUM_PATH` dersom Chromium ligger et annet sted enn `/usr/bin/chromium`. Playwright er bare nødvendig for denne testen, ikke for å bruke appen.
 
+## AI-assistent: oppsett og test
+
+For klargjøring og manuelle steg til drift: [nybegynnerveiledning med kostnadsanslag](docs/GO-LIVE.md). Se også [sikkerhetsgjennomgangen](docs/SECURITY-REVIEW.md). `render.yaml` forbereder én gratis backend uten automatiske deploys og uten hemmelige verdier. Backend er nå opprettet av eieren på Render; se [tilkoblingsveiledningen](docs/CONNECT-RENDER.md).
+
+Se [den trinnvise AI-veiledningen](docs/AI-SETUP.md) for arkitektur, sikkerhet, miljøvariabler, lokal oppstart, hostingforslag og tester. AI-backend bruker Node.js 24 og OpenAI Responses API direkte, uten ekstra pakker. Ingen API-nøkler skal legges i nettleseren eller repositoryet.
+
+**Backend er publisert av eieren på `https://bi-study-agent-api.onrender.com`, og eieren har bekreftet health-svar. Frontend-oppgraderingen ligger fortsatt på `feature/ai-study-agent`, uten merge eller deploy til GitHub Pages.** Automatiske tester her bruker en simulert OpenAI-tjeneste. Skymiljøets nettverk blokkerer direkte testing av den publiserte backend-adressen.
+
+Uten backend fortsetter GitHub Pages å fungere som før. For å bruke AI kobler du til den separate HTTPS-backenden med ditt private tilgangstoken. Chatpanelet forklarer hvilke data du deler, og lagrer verken token eller samtalehistorikk i localStorage.
+
 ## Videre utvikling
 
-Neste steg er en lokal backend med OpenAI Agents SDK, sikker håndtering av API-nøkkel på serversiden og søk i egne pensumfiler. API-nøkler skal aldri legges i nettleserkoden. Filstøtte, kildehenvisninger, planprioritering og kalenderintegrasjon kan bygges inn trinnvis etter at denne arbeidsflyten er prøvd ut.
+Grunnstrukturen for private dokumenter ligger i `backend/documents.mjs`. Opplasting, PDF-uttrekk, søk og kildehenvisninger er ikke implementert. Disse må få autentisering, filgrenser og privat lagring før de aktiveres. Kalender og automatisk synkronisering mellom enheter kommer eventuelt senere.

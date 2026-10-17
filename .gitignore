@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+node_modules/
+coverage/
+*.log
+# Private study files/backups must stay outside the public site.
+private/
+uploads/
+backups/
+bi-study-agent-*.json
+*.pem
+*.key
+*.p12
